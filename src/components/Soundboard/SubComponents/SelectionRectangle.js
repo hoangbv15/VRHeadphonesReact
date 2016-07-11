@@ -22,12 +22,7 @@ class SelectionRectangle extends React.Component {
     }
   }
   render() {
-    if (
-      this.props.dragStartX !== null &&
-      this.props.dragStartY !== null &&
-      this.props.dragCurrentX !== null &&
-      this.props.dragCurrentY !== null
-    ) {
+    if (this.props.visible) {
       this.updateCanvas();
     }
     return false;
@@ -40,6 +35,7 @@ SelectionRectangle.propTypes = {
   dragStartY: PropTypes.number,
   dragCurrentX: PropTypes.number,
   dragCurrentY: PropTypes.number,
+  visible: PropTypes.bool,
 };
 
 export default SelectionRectangle;

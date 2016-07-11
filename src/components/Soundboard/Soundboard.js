@@ -42,6 +42,7 @@ const initialState = {
   dragStartY: null,
   dragCurrentX: null,
   dragCurrentY: null,
+  isDragSelecting: false,
 };
 
 class Soundboard extends React.Component {
@@ -49,7 +50,6 @@ class Soundboard extends React.Component {
     super(props);
     this.state = initialState;
     this.isDragging = false;
-    this.isDragSelecting = false;
   }
   componentDidMount() {
     this.key = require('keymaster');
@@ -59,7 +59,6 @@ class Soundboard extends React.Component {
     imgAssets = preload(imgAssets, () => {
       this.setState({ canvas: this.refs.canvas, assets: imgAssets });
     });
-    // this.refs.rect.rotate(45);
   }
   componentWillUnmount() {
     this.key.unbind('a, left', this.handleKeyDown.left);
@@ -87,7 +86,7 @@ class Soundboard extends React.Component {
         if(!this.key.shift) {
           this.props.dispatch(deselectAllSoundSources());
         }
-        this.isDragSelecting = true;
+        this.setState({ isDragSelecting: true, });
       } else if (this.key.shift) {
         if (!this.props.soundSources[selectedIndex].selected) {
           this.props.dispatch(selectSoundSource(selectedIndex));
@@ -103,40 +102,41 @@ class Soundboard extends React.Component {
       }
     },
     mouseUp: (e) => {
+      if (this.isDragging && !this.state.isDragSelecting) {
+        // If was moving sound sources, dispatch the move result
+        let delta = this.getRelativeDeltas(this.state.dragCurrentX - this.state.dragStartX, this.state.dragCurrentY - this.state.dragStartY);
+        this.props.dispatch(moveSoundSource(delta.x, delta.y));
+      }
+      // Reset mouse status
       this.setState({
         dragStartX: null,
         dragStartY: null,
         dragCurrentX: null,
         dragCurrentY: null,
+        isDragSelecting: false,
       });
       this.isDragging = false;
-      this.isDragSelecting = false;
     },
     mouseMove: (e) => {
       if (this.isDragging) {
         let pos = this.handleKeyDown.getMousePos(e);
-        if (this.isDragSelecting) {
-          let dragCurrentX = pos.x;
-          let dragCurrentY = pos.y;
+        this.setState({ dragCurrentX: pos.x, dragCurrentY: pos.y });
+        if (this.state.isDragSelecting) {
           let dragStartX = this.state.dragStartX;
           let dragStartY = this.state.dragStartY;
 
-          this.setState({ dragCurrentX: pos.x, dragCurrentY: pos.y });
           // Select the sounds that are within the drag selection
           for (let i = 0; i < this.props.soundSources.length; i++) {
             let relPos = this.props.soundSources[i];
             let abPos = this.getAbsolutePosition(relPos.x, relPos.y);
 
-            if (Math.min(dragCurrentX, dragStartX) < abPos.x && abPos.x < Math.max(dragCurrentX, dragStartX) &&
-              Math.min(dragCurrentY, dragStartY) < abPos.y && abPos.y < Math.max(dragCurrentY, dragStartY)) {
+            if (Math.min(pos.x, dragStartX) < abPos.x && abPos.x < Math.max(pos.x, dragStartX) &&
+              Math.min(pos.y, dragStartY) < abPos.y && abPos.y < Math.max(pos.y, dragStartY)) {
               this.props.dispatch(selectSoundSource(i));
             }
           }
           return;
         }
-        let delta = this.getRelativeDeltas(pos.x - this.state.dragStartX, pos.y - this.state.dragStartY);
-        this.setState({ dragStartX: pos.x, dragStartY: pos.y });
-        this.props.dispatch(moveSoundSource(delta.x, delta.y));
       }
     },
     getMousePos: (e) => {
@@ -204,6 +204,7 @@ class Soundboard extends React.Component {
           dragStartY={this.state.dragStartY}
           dragCurrentX={this.state.dragCurrentX}
           dragCurrentY={this.state.dragCurrentY}
+          visible={this.state.isDragSelecting}
         />
       </div>
     );
