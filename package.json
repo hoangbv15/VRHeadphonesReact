@@ -105,6 +105,7 @@
     "react-transform-hmr": "^1.0.4",
     "redbox-react": "^1.2.4",
     "redux-logger": "^2.6.1",
+    "redux-undo": "^1.0.0-beta8",
     "sinon": "^2.0.0-pre",
     "stylelint": "^6.4.1",
     "stylelint-config-standard": "^7.0.0",

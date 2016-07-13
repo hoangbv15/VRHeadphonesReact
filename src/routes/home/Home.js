@@ -9,33 +9,46 @@
 
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { ActionCreators } from 'redux-undo';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Home.css';
 import Soundboard from '../../components/Soundboard';
 
 const title = 'VR Headphones';
 
-function Home({ angle, soundSources }, context) {
-  context.setTitle(title);
-  return (
-    <div className={s.root}>
-      <div className={s.container}>
-        <h1 className={s.title} />
-        <Soundboard angle={angle} soundSources={soundSources} />
+class Home extends React.Component {
+  componentDidMount() {
+    const key = require('keymaster');
+    key('ctrl + z', () => { this.props.dispatch(ActionCreators.undo()); });
+    key('ctrl + shift + z', () => { this.props.dispatch(ActionCreators.redo()); });
+  }
+
+  render() {
+    this.context.setTitle(title);
+    return (
+      <div className={s.root}>
+        <div className={s.container}>
+          <h1 className={s.title} />
+          <Soundboard
+            angle={this.props.angle}
+            soundSources={this.props.soundSources}
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 Home.propTypes = {
   angle: PropTypes.number.isRequired,
   soundSources: PropTypes.array.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 Home.contextTypes = { setTitle: PropTypes.func.isRequired };
 
 const mapStateToProps = (state) => ({
-  angle: state.soundboardReducer.directionalTurn.angle,
-  soundSources: state.soundboardReducer.directionalTurn.soundSources,
+  angle: state.soundboardReducer.directionalTurn.present.angle,
+  soundSources: state.soundboardReducer.directionalTurn.present.soundSources,
 });
 
 const HomeApp = connect(

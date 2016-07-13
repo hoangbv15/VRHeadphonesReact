@@ -24,6 +24,7 @@ import {
   setTurnDirection,
   selectSoundSource,
   moveSoundSource,
+  commitMoveSoundSource,
   deselectSoundSource,
   deselectAllSoundSources,
 } from '../../actions/soundboardActions';
@@ -103,6 +104,13 @@ class Soundboard extends React.Component {
       }
     },
     mouseUp: (e) => {
+      // Commit mouse move into history
+      if (this.isDragging && !this.isDragSelecting) {
+        let pos = this.handleKeyDown.getMousePos(e);
+        let delta = this.getRelativeDeltas(pos.x - this.state.dragStartX, pos.y - this.state.dragStartY);
+        this.props.dispatch(commitMoveSoundSource(delta.x, delta.y));
+      }
+
       this.setState({
         dragStartX: null,
         dragStartY: null,

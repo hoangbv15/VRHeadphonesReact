@@ -1,7 +1,8 @@
 import {
   DIRECTIONAL_TURN,
   SOUNDSOURCE_SELECTED,
-  SOUNDSOURCE_MOVED,
+  SOUNDSOURCE_MOVED_COMMIT,
+  SOUNDSOURCE_MOVED_INTERIM,
   SOUNDSOURCE_DESELECTED,
   SOUNDSOURCE_DESELECT_ALL,
 } from '../constants';
@@ -41,7 +42,17 @@ export function deselectAllSoundSources() {
 
 export function moveSoundSource(deltaX, deltaY) {
   return {
-    type: SOUNDSOURCE_MOVED,
+    type: SOUNDSOURCE_MOVED_INTERIM,
+    payload: {
+      deltaX,
+      deltaY,
+    },
+  };
+}
+
+export function commitMoveSoundSource(deltaX, deltaY) {
+  return {
+    type: SOUNDSOURCE_MOVED_COMMIT,
     payload: {
       deltaX,
       deltaY,

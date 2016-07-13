@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux';
+import undoable, { includeAction } from 'redux-undo';
 import {
   DIRECTIONAL_TURN,
   SOUNDSOURCE_SELECTED,
-  SOUNDSOURCE_MOVED,
+  SOUNDSOURCE_MOVED_INTERIM,
+  SOUNDSOURCE_MOVED_COMMIT,
   SOUNDSOURCE_DESELECTED,
   SOUNDSOURCE_DESELECT_ALL,
 } from '../constants';
@@ -61,7 +63,8 @@ function directionalTurn(state = initialState, action) {
           }))
         ),
       });
-    case SOUNDSOURCE_MOVED:
+    case SOUNDSOURCE_MOVED_COMMIT:
+    case SOUNDSOURCE_MOVED_INTERIM:
       return Object.assign({}, state, {
         soundSources: state.soundSources.map(s => {
           if (!s.selected) {
@@ -79,7 +82,10 @@ function directionalTurn(state = initialState, action) {
 }
 
 const soundboardReducer = combineReducers({
-  directionalTurn,
+  directionalTurn: undoable(directionalTurn, {
+    limit: 100, // set a limit for the history
+    filter: includeAction([SOUNDSOURCE_MOVED_COMMIT]),
+  }),
 });
 
 export default soundboardReducer;
