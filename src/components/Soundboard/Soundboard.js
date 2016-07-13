@@ -148,10 +148,13 @@ class Soundboard extends React.Component {
       }
     },
     getMousePos: (e) => {
+      console.log(e);
+      const clientX = typeof e.clientX === 'undefined' ? e.changedTouches[0].clientX : e.clientX,
+            clientY = typeof e.clientY === 'undefined' ? e.changedTouches[0].clientY : e.clientY;
       let rect = this.refs.canvas.getBoundingClientRect();
       return {
-        x: (e.clientX - rect.left) / (rect.right - rect.left) * this.refs.canvas.width,
-        y: (e.clientY - rect.top) / (rect.bottom - rect.top) * this.refs.canvas.height
+        x: (clientX - rect.left) / (rect.right - rect.left) * this.refs.canvas.width,
+        y: (clientY - rect.top) / (rect.bottom - rect.top) * this.refs.canvas.height
       };
     }
   }
@@ -182,6 +185,9 @@ class Soundboard extends React.Component {
         onMouseDown={this.handleKeyDown.mouseDown}
         onMouseUp={this.handleKeyDown.mouseUp}
         onMouseMove={this.handleKeyDown.mouseMove}
+        onTouchStart={this.handleKeyDown.mouseDown}
+        onTouchMove={this.handleKeyDown.mouseMove}
+        onTouchEnd={this.handleKeyDown.mouseUp}
       >
         <canvas ref="canvas" width={500} height={500}>
         </canvas>
